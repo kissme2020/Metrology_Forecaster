@@ -1,0 +1,37 @@
+* Metrology Trend
+
+** Metrolgy Trend related
+*** Plot scatter from calibration history
+    x: Time date
+    y: calibration measured data
+    y error bar: error bar 95% of uncertainty
+
+*** Show Error bar (MU 95%)
+*** Linear approximate
+
+** Python Related
+
+*** Path structure
+   ref link: https://towardsdatascience.com/virtual-environments-104c62d48c54
+   Metrology_Forecaster/
+   |-- data: raw Data to laod
+   |-- develop: Org file realted to
+   |-- src: Scripts
+   |-- venv: python verital Environments
+   |-- assets/
+   |   |--icon files
+   |   |--style.css
+
+*** Python venv
+**** Make Dir for VENV
+	 cd test-project/
+	 python3 -m venv venv/
+**** Install package
+***** python lsp server,
+	 ref url: https://github.com/palantir/python-language-server
+	 python language server replaced python-lsp-server
+	 https://github.com/QuantStack/pyls-memestra/issues/42
+	 pip install 'python-lsp-server[all]'
+***** Python dash board
+	  Ref URL: https://realpython.com/python-dash/
+	  python -m pip install dash==1.13.3 pandas==1.0.5
