@@ -1,13 +1,108 @@
 * Metrology Trend
 
 ** Metrolgy Trend related
-*** Plot scatter from calibration history
-    x: Time date
-    y: calibration measured data
-    y error bar: error bar 95% of uncertainty
+*** Plot Calibration Trend line
+**** Plot Measured Value and uncertainty from CAL Report as Error bar
+**** Trend line
+***** Use Python scipy.optimize.curve_fit
+****** Converter date as days
+
+#+begin_src python
+
+# Get difference as days of calibration date
+cal_days = [0]  # Set initial daty as 0
+# cal_days = []  # Set initial daty as 0
+for i in range(len(data.Cal_Date) - 1):
+    # Iterate Cal Date
+    delta = data.Cal_Date[i+1] - data.Cal_Date[i]
+    # cal_days.append(delta.days)
+    cal_days.append(cal_days[-1] + delta.days)
+
+cal_days = np.array(cal_days)
+
+#+end_src
+
+****** fit linear
+
+#+begin_src python
+from scipy.optimize import curve_fit
+
+"""
+Functions for curve_fit.
+Linear, quadric, etc
+"""
+
+def first_order_func(x, a, b):
+    """For linear Approximation.
+
+    x: List or array, independence variable
+    a: Float, coefficient of first order x
+    b: Float, intercept of linear approximation
+    """
+    return a*x + b
+
+# Get linear approximation line
+popt, pcov = curve_fit(first_order_func,
+                       cal_days,
+                       y)
+# Linear fit
+linear_fit_y = first_order_func(cal_days, *popt)
+#+end_src
+
+****** Get prediction interval
+	   * Formula for 95 % T-Distribution predication Interval
+
+#+BEGIN_LATEX
+The 95% confidence interval for the forecasted values $\hat{y}_0$ of $x$ is
+
+\[ \hat{y}_0 \pm t_{crit} \times \left (
+ S_{yx} \cdot \sqrt{1 + \frac{1}{n} + \frac{(x - \bar{x})^2}{SS_x}}
+\right ) \]
+
+Where
+
+\begin{align*}
+t_{crit} &\:\ \text{Two-tailed inverse of the Student's t-distribution} \\
+S_{yx} &\:\ \text{Standard error, line provides a measure of the error in the prediction of $y$ for an individual $x$}\\
+n &\:\ \text{Number of samples}\\
+x &\:\ \text{Independt variable}\\
+\bar{x} &\: \text{Mean of $x$}\\
+SS_{x} &\:\ \text{Sum of the squared deviations from the sample mean $x$}
+\end{align*}
+#+END_LATEX
+
+	   Python Scripts to get t_crit, S_yx, and SS_x
+
+#+begin_src python
+import statsmodels.api as sm
+
+# S_yx
+x_prime = sm.add_constant(cal_days)
+model = sm.OLS(y, x_prime)
+fit = model.fit()
+s_yx = np.sqrt(fit.mse_resid)
+
+# SS_x
+ss_x = ((cal_days - np.mean(cal_days)) ** 2.0).sum()
+
+# Prediction Intervals
+t_crit = stats.t.ppf(1 - 0.025,
+                     len(cal_days)-2)
+p_se = s_yx * np.sqrt(1 + (
+    1 / len(y)) + (
+    (cal_days - (np.mean(cal_days)) ** 2.0) / ss_x))
+
+predict_up_err = linear_fit_y + (t_crit * p_se)
+predict_low_err = linear_fit_y - (t_crit * p_se)
+#+end_src
+
 
 *** Show Error bar (MU 95%)
-*** Linear approximate
+*** Linear approximate to get best fit
+**** Use scipy.optimize.curve_fit
+	 check how does it fit with linear approximation
+
+
 
 ** Python Related
 
